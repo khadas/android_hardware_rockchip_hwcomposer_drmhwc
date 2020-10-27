@@ -275,6 +275,19 @@ uint64_t get_internal_format(buffer_handle_t handle)
     return (get_internal_format_from_fourcc(fourcc, modifier) );
 }
 
+int get_pixel_format_modifier(buffer_handle_t handle, uint64_t* modifier)
+{
+    auto &mapper = get_service();
+
+    int err = get_metadata(mapper, handle, MetadataType_PixelFormatModifier, decodePixelFormatModifier, modifier);
+    if (err != android::OK)
+    {
+        E("err : %d", err);
+    }
+
+    return err;
+}
+
 int get_width(buffer_handle_t handle, uint64_t* width)
 {
     auto &mapper = get_service();
