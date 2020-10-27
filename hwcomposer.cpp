@@ -1395,7 +1395,11 @@ int DrmHwcLayer::InitFromHwcLayer(struct hwc_context_t *ctx, int display, hwc_la
 #endif
 #endif // #if USE_GRALLOC_4
 
+#if USE_GRALLOC_4
+        if ( gralloc4::does_use_afbc_format(sf_handle) )
+#else
         if(isAfbcInternalFormat(internal_format))
+#endif
         {
             ALOGD_IF(log_level(DBG_VERBOSE),"to set 'is_afbc'.");
             is_afbc = true;
@@ -1923,7 +1927,11 @@ static bool is_use_gles_comp(struct hwc_context_t *ctx, DrmConnector *connector,
 #endif
 #endif // #if USE_GRALLOC_4
 
+#if USE_GRALLOC_4
+        if ( gralloc4::does_use_afbc_format(layer->handle) )
+#else
             if(isAfbcInternalFormat(internal_format))
+#endif
                 iFbdcCnt++;
 #else
                     UN_USED(ret);

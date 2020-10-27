@@ -218,7 +218,13 @@ int DrmGenericImporter::ImportBuffer(buffer_handle_t handle, hwc_drm_bo_t *bo
                          handle, &internal_format);
 #endif
 #endif // #if USE_GRALLOC_4
+
+
+#if USE_GRALLOC_4
+  if ( gralloc4::does_use_afbc_format(handle) )
+#else
   if (isAfbcInternalFormat(internal_format))
+#endif
   {
     ALOGD_IF(log_level(DBG_DEBUG),"KP : to set DRM_FORMAT_MOD_ARM_AFBC.");
 #ifdef ANDROID_R
