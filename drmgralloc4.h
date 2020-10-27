@@ -83,6 +83,11 @@ uint64_t get_internal_format(buffer_handle_t handle);
  */
 int get_pixel_format_modifier(buffer_handle_t handle, uint64_t* modifier);
 
+/*
+ * 当前 buffer 是否使用 AFBC 格式.
+ */
+bool does_use_afbc_format(buffer_handle_t handle);
+
 int get_width(buffer_handle_t handle, uint64_t* width);
 
 int get_height(buffer_handle_t handle, uint64_t* height);

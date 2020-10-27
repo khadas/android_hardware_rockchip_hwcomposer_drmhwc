@@ -51,8 +51,10 @@
  */
 
 #define LOG_TAG "platform_gralloc4"
-#define ENABLE_DEBUG_LOG
+// #define ENABLE_DEBUG_LOG
 #include <custom_log.h>
+
+#include <inttypes.h>
 
 #include <sync/sync.h>
 
@@ -286,6 +288,28 @@ int get_pixel_format_modifier(buffer_handle_t handle, uint64_t* modifier)
     }
 
     return err;
+}
+
+bool does_use_afbc_format(buffer_handle_t handle)
+{
+    uint64_t modifier;
+    int err = get_pixel_format_modifier(handle, &modifier);
+    if (err != android::OK)
+    {
+        E("err : %d", err);
+        return false;
+    }
+
+    if ( AFBC_FORMAT_MOD_BLOCK_SIZE_16x16 == (modifier & AFBC_FORMAT_MOD_BLOCK_SIZE_16x16) )
+    {
+        D("buffer DOES uses AFBC format, modifier : 0x%" PRIx64, modifier);
+        return true;
+    }
+    else
+    {
+        D("buffer does NOT use AFBC format, modifier : 0x%" PRIx64, modifier);
+        return false;
+    }
 }
 
 int get_width(buffer_handle_t handle, uint64_t* width)
