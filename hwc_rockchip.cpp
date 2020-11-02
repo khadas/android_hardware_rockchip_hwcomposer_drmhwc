@@ -36,9 +36,6 @@
 
 #define LOG_TAG "hwc_rk"
 
-// #define ENABLE_DEBUG_LOG
-#include <log/custom_log.h>
-
 #include <inttypes.h>
 #ifdef TARGET_BOARD_PLATFORM_RK3368
 #include <hardware/img_gralloc_public.h>

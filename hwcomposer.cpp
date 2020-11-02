@@ -37,9 +37,6 @@
 #define ATRACE_TAG ATRACE_TAG_GRAPHICS
 #define LOG_TAG "hwcomposer-drm"
 
-// #define ENABLE_DEBUG_LOG
-#include <log/custom_log.h>
-
 #include "drmhwcomposer.h"
 #include "drmeventlistener.h"
 #include "drmresources.h"
@@ -1348,13 +1345,12 @@ int DrmHwcLayer::InitFromHwcLayer(struct hwc_context_t *ctx, int display, hwc_la
     return ret;
 #endif
 
-    D("to check AFBC.");
 
 #if USE_AFBC_LAYER
     // if(sf_handle)
     if ( sf_handle && bFbTarget_ )
     {
-        D("we got buffer handle for fb_target_layer, to get internal_format.");
+        ALOGD_IF(log_level(DBG_VERBOSE),"we got buffer handle for fb_target_layer, to get internal_format.");
 #if RK_PER_MODE
         struct gralloc_drm_handle_t* drm_hnd = (struct gralloc_drm_handle_t *)sf_handle;
         internal_format = drm_hnd->internal_format;
@@ -1368,21 +1364,21 @@ int DrmHwcLayer::InitFromHwcLayer(struct hwc_context_t *ctx, int display, hwc_la
 #endif
         if(isAfbcInternalFormat(internal_format))
         {
-            D("to set 'is_afbc'.");
+            ALOGD_IF(log_level(DBG_VERBOSE),"to set 'is_afbc'.");
             is_afbc = true;
         }
         else
         {
-            D("not a afbc_buffer.");
+            ALOGD_IF(log_level(DBG_VERBOSE),"not a afbc_buffer.");
         }
     }
 
     if(bFbTarget_ && !sf_handle)
     {
-        D("we could not got buffer handle, and current buffer is for fb_target_layer, to check AFBC in a trick way.");
+        ALOGD_IF(log_level(DBG_VERBOSE),"we could not got buffer handle, and current buffer is for fb_target_layer, to check AFBC in a trick way.");
 
         static int iFbdcSupport = -1;
-        D("iFbdcSupport = %d",iFbdcSupport);
+        ALOGD_IF(log_level(DBG_VERBOSE),"iFbdcSupport = %d",iFbdcSupport);
 
         // if(iFbdcSupport == -1)
         if(iFbdcSupport <= 0)
@@ -1394,13 +1390,13 @@ int DrmHwcLayer::InitFromHwcLayer(struct hwc_context_t *ctx, int display, hwc_la
             iFbdcSupport = atoi(fbdc_value);
             if(iFbdcSupport > 0 && display == 0)
             {
-                D("to set 'is_afbc'.");
+                ALOGD_IF(log_level(DBG_VERBOSE),"to set 'is_afbc'.");
                 is_afbc = true;
             }
         }
         else if(iFbdcSupport > 0 && display == 0)
         {
-            D("to set 'is_afbc'.");
+            ALOGD_IF(log_level(DBG_VERBOSE),"to set 'is_afbc'.");
             is_afbc = true;
         }
     }
