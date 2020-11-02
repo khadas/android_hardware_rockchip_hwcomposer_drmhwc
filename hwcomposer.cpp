@@ -85,6 +85,11 @@
 #include <android/configuration.h>
 #define UM_PER_INCH 25400
 
+#if USE_GRALLOC_4
+#include "drmgralloc4.h"
+#endif
+
+
 namespace android {
 
 static int hwc_set_active_config(struct hwc_composer_device_1 *dev, int display,
@@ -746,6 +751,16 @@ int DrmHwcBuffer::ImportBuffer(buffer_handle_t handle, Importer *importer
 
 int DrmHwcNativeHandle::CopyBufferHandle(buffer_handle_t handle,
                                          const gralloc_module_t *gralloc) {
+#if USE_GRALLOC_4
+      /* import 'handle' 得到对应的 新的 imported 的 buffer_handle_t 实例. */
+      buffer_handle_t handle_copy;
+      status_t ret = gralloc4::importBuffer(handle, &handle_copy);
+      if ( ret != NO_ERROR )
+      {
+          ALOGE("err. ret : %d", ret);
+          return ret;
+      }
+#else   // USE_GRALLOC_4
   native_handle_t *handle_copy = dup_buffer_handle(handle);
   if (handle_copy == NULL) {
     ALOGE("Failed to duplicate handle");
@@ -758,11 +773,12 @@ int DrmHwcNativeHandle::CopyBufferHandle(buffer_handle_t handle,
     free_buffer_handle(handle_copy);
     return ret;
   }
+#endif  // USE_GRALLOC_4
 
   Clear();
 
   gralloc_ = gralloc;
-  handle_ = handle_copy;
+  handle_ = const_cast<native_handle_t*>(handle_copy);
 
   return 0;
 }
@@ -772,12 +788,23 @@ DrmHwcNativeHandle::~DrmHwcNativeHandle() {
 }
 
 void DrmHwcNativeHandle::Clear() {
+#if USE_GRALLOC_4
+      if ( handle_ != NULL )
+      {
+          gralloc4::freeBuffer(handle_);
+          gralloc_ = NULL;
+          handle_ = NULL;
+      }
+#else   // USE_GRALLOC_4
+
   if (gralloc_ != NULL && handle_ != NULL) {
     gralloc_->unregisterBuffer(gralloc_, handle_);
     free_buffer_handle(handle_);
     gralloc_ = NULL;
     handle_ = NULL;
   }
+#endif  // USE_GRALLOC_4
+
 }
 
 static const char *DrmFormatToString(uint32_t drm_format) {
@@ -1351,6 +1378,10 @@ int DrmHwcLayer::InitFromHwcLayer(struct hwc_context_t *ctx, int display, hwc_la
     if ( sf_handle && bFbTarget_ )
     {
         ALOGD_IF(log_level(DBG_VERBOSE),"we got buffer handle for fb_target_layer, to get internal_format.");
+#if USE_GRALLOC_4
+        internal_format = gralloc4::get_internal_format(sf_handle);
+#else // #if USE_GRALLOC_4
+
 #if RK_PER_MODE
         struct gralloc_drm_handle_t* drm_hnd = (struct gralloc_drm_handle_t *)sf_handle;
         internal_format = drm_hnd->internal_format;
@@ -1362,6 +1393,8 @@ int DrmHwcLayer::InitFromHwcLayer(struct hwc_context_t *ctx, int display, hwc_la
             return ret;
         }
 #endif
+#endif // #if USE_GRALLOC_4
+
         if(isAfbcInternalFormat(internal_format))
         {
             ALOGD_IF(log_level(DBG_VERBOSE),"to set 'is_afbc'.");
@@ -1872,6 +1905,10 @@ static bool is_use_gles_comp(struct hwc_context_t *ctx, DrmConnector *connector,
             }
 
 #if USE_AFBC_LAYER
+#if USE_GRALLOC_4
+                        internal_format = gralloc4::get_internal_format(layer->handle);
+#else // #if USE_GRALLOC_4
+
 #if RK_PER_MODE
             struct gralloc_drm_handle_t* drm_hnd = (struct gralloc_drm_handle_t *)layer->handle;
             internal_format = drm_hnd->internal_format;
@@ -1884,6 +1921,8 @@ static bool is_use_gles_comp(struct hwc_context_t *ctx, DrmConnector *connector,
                 return false;
             }
 #endif
+#endif // #if USE_GRALLOC_4
+
             if(isAfbcInternalFormat(internal_format))
                 iFbdcCnt++;
 #else
@@ -4298,6 +4337,9 @@ static int hwc_device_open(const struct hw_module_t *module, const char *name,
     ALOGE("Can't initialize Drm object %d", ret);
     return ret;
   }
+#if USE_GRALLOC_4
+    ctx->gralloc =  NULL;
+#else   // USE_GRALLOC_4
 
   ret = hw_get_module(GRALLOC_HARDWARE_MODULE_ID,
                       (const hw_module_t **)&ctx->gralloc);
@@ -4305,6 +4347,7 @@ static int hwc_device_open(const struct hw_module_t *module, const char *name,
     ALOGE("Failed to open gralloc module %d", ret);
     return ret;
   }
+#endif  // USE_GRALLOC_4
 
   ctx->drm.setGralloc(ctx->gralloc);
 

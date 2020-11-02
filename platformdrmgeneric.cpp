@@ -50,6 +50,10 @@
 #include <cutils/log.h>
 #endif
 
+#if USE_GRALLOC_4
+#include "drmgralloc4.h"
+#endif
+
 #if RK_DRM_GRALLOC
 #include <gralloc_drm_handle.h>
 #endif
@@ -83,12 +87,17 @@ DrmGenericImporter::~DrmGenericImporter() {
 }
 
 int DrmGenericImporter::Init() {
+#if USE_GRALLOC_4
+    gralloc_ = NULL;
+#else   // USE_GRALLOC_4
+
   int ret = hw_get_module(GRALLOC_HARDWARE_MODULE_ID,
                           (const hw_module_t **)&gralloc_);
   if (ret) {
     ALOGE("Failed to open gralloc module");
     return ret;
   }
+#endif  // USE_GRALLOC_4
   flag_ = NO_FLAG;
   return 0;
 }
@@ -197,6 +206,10 @@ int DrmGenericImporter::ImportBuffer(buffer_handle_t handle, hwc_drm_bo_t *bo
   __u64 modifier[4];
   uint64_t internal_format;
   memset(modifier, 0, sizeof(modifier));
+#if USE_GRALLOC_4
+    internal_format = gralloc4::get_internal_format(handle);
+#else // #if USE_GRALLOC_4
+
 #if RK_PER_MODE
   struct gralloc_drm_handle_t* drm_hnd = (struct gralloc_drm_handle_t *)handle;
   internal_format = drm_hnd->internal_format;
@@ -204,6 +217,7 @@ int DrmGenericImporter::ImportBuffer(buffer_handle_t handle, hwc_drm_bo_t *bo
   gralloc_->perform(gralloc_, GRALLOC_MODULE_PERFORM_GET_INTERNAL_FORMAT,
                          handle, &internal_format);
 #endif
+#endif // #if USE_GRALLOC_4
   if (isAfbcInternalFormat(internal_format))
   {
     ALOGD_IF(log_level(DBG_DEBUG),"KP : to set DRM_FORMAT_MOD_ARM_AFBC.");

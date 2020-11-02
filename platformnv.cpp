@@ -79,12 +79,17 @@ NvImporter::~NvImporter() {
 }
 
 int NvImporter::Init() {
+#if USE_GRALLOC_4
+      gralloc_ = NULL;
+#else   // USE_GRALLOC_4
+
   int ret = hw_get_module(GRALLOC_HARDWARE_MODULE_ID,
                           (const hw_module_t **)&gralloc_);
   if (ret) {
     ALOGE("Failed to open gralloc module %d", ret);
     return ret;
   }
+#endif  // USE_GRALLOC_4
 
   if (strcasecmp(gralloc_->common.author, "NVIDIA"))
     ALOGW("Using non-NVIDIA gralloc module: %s/%s\n", gralloc_->common.name,

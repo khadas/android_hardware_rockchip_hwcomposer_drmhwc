@@ -40,6 +40,7 @@
 #include "hwc_debug.h"
 #include "hwc_rockchip.h"
 #include <sstream>
+#include "drmgralloc4.h"
 
 namespace android {
 
@@ -103,6 +104,9 @@ int DumpLayer(const char* layer_name,buffer_handle_t handle)
         const gralloc_module_t *gralloc;
         void* cpu_addr;
         int width,height,stride,byte_stride,format,size;
+#if USE_GRALLOC_4
+        gralloc = NULL;
+#else   // USE_GRALLOC_4
 
         int ret = hw_get_module(GRALLOC_HARDWARE_MODULE_ID,
                           (const hw_module_t **)&gralloc);
@@ -110,6 +114,7 @@ int DumpLayer(const char* layer_name,buffer_handle_t handle)
             ALOGE("Failed to open gralloc module");
             return ret;
         }
+#endif  // USE_GRALLOC_4
 #if (!RK_PER_MODE && RK_DRM_GRALLOC)
         width = hwc_get_handle_attibute(gralloc,handle,ATT_WIDTH);
         height = hwc_get_handle_attibute(gralloc,handle,ATT_HEIGHT);
@@ -129,8 +134,25 @@ int DumpLayer(const char* layer_name,buffer_handle_t handle)
         DumpSurfaceCount++;
         sprintf(data_name,"/data/dump/dmlayer_%.20s_%d_%d_%d.bin",layer_name,DumpSurfaceCount,
                 stride,height);
-        gralloc->lock(gralloc, handle, GRALLOC_USAGE_SW_READ_MASK | GRALLOC_USAGE_SW_WRITE_MASK, //gr_handle->usage,
-                        0, 0, width, height, (void **)&cpu_addr);
+#if USE_GRALLOC_4
+                gralloc4::lock(handle,
+                               GRALLOC_USAGE_SW_READ_MASK, // 'usage'
+                               0, // 'x'
+                               0, // 'y'
+                               width,
+                               height,
+                               (void **)&cpu_addr); // 'outData'
+#else   // USE_GRALLOC_4
+                gralloc->lock(gralloc,
+                              handle,
+                              GRALLOC_USAGE_SW_READ_MASK | GRALLOC_USAGE_SW_WRITE_MASK, //gr_handle->usage,
+                              0,
+                              0,
+                              width,
+                              height,
+                              (void **)&cpu_addr);
+#endif  // USE_GRALLOC_4
+
         pfile = fopen(data_name,"wb");
         if(pfile)
         {
@@ -146,7 +168,12 @@ int DumpLayer(const char* layer_name,buffer_handle_t handle)
             ALOGD(" dump surface layer_name: %s,data_name %s,w:%d,h:%d,stride :%d,size=%d,cpu_addr=%p",
                 layer_name,data_name,width,height,byte_stride,size,cpu_addr);
         }
+#if USE_GRALLOC_4
+        gralloc4::unlock(handle);
+#else   // USE_GRALLOC_4
         gralloc->unlock(gralloc, handle);
+#endif  // USE_GRALLOC_4
+
         //only dump once time.
         if(DumpSurfaceCount > DUMP_LAYER_CNT)
         {

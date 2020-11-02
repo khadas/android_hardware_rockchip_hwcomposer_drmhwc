@@ -59,6 +59,35 @@ LOCAL_C_INCLUDES := \
 	external/libdrm/include/drm \
 	system/core/include/utils \
 	hardware/rockchip/librga
+
+LOCAL_SRC_FILES := \
+	autolock.cpp \
+	drmresources.cpp \
+	drmcomposition.cpp \
+	drmcompositor.cpp \
+	drmcompositorworker.cpp \
+	drmconnector.cpp \
+	drmcrtc.cpp \
+	drmdisplaycomposition.cpp \
+	drmdisplaycompositor.cpp \
+	drmencoder.cpp \
+	drmeventlistener.cpp \
+	drmmode.cpp \
+	drmplane.cpp \
+	drmproperty.cpp \
+	glworker.cpp \
+	hwcomposer.cpp \
+	platform.cpp \
+	platformdrmgeneric.cpp \
+	platformnv.cpp \
+	separate_rects.cpp \
+	virtualcompositorworker.cpp \
+	vsyncworker.cpp \
+	worker.cpp \
+	hwc_util.cpp \
+	hwc_rockchip.cpp \
+	hwc_debug.cpp
+
 # API 30 -> Android 11.0
 ifneq (1,$(strip $(shell expr $(PLATFORM_SDK_VERSION) \< 30)))
 LOCAL_CFLAGS += -DANDROID_R
@@ -119,34 +148,6 @@ LOCAL_C_INCLUDES += \
 	system/core/libsync/include
 
 endif
-
-LOCAL_SRC_FILES := \
-	autolock.cpp \
-	drmresources.cpp \
-	drmcomposition.cpp \
-	drmcompositor.cpp \
-	drmcompositorworker.cpp \
-	drmconnector.cpp \
-	drmcrtc.cpp \
-	drmdisplaycomposition.cpp \
-	drmdisplaycompositor.cpp \
-	drmencoder.cpp \
-	drmeventlistener.cpp \
-	drmmode.cpp \
-	drmplane.cpp \
-	drmproperty.cpp \
-	glworker.cpp \
-	hwcomposer.cpp \
-        platform.cpp \
-        platformdrmgeneric.cpp \
-        platformnv.cpp \
-	separate_rects.cpp \
-	virtualcompositorworker.cpp \
-	vsyncworker.cpp \
-	worker.cpp \
-        hwc_util.cpp \
-        hwc_rockchip.cpp \
-        hwc_debug.cpp
 
 ifeq ($(strip $(BOARD_DRM_HWCOMPOSER_BUFFER_IMPORTER)),nvidia-gralloc)
 LOCAL_CPPFLAGS += -DUSE_NVIDIA_IMPORTER
@@ -355,11 +356,35 @@ endif
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)),rk3326)
 USE_AFBC_LAYER = 1
 RGA_VER = 2
-LOCAL_CPPFLAGS += -DTARGET_BOARD_PLATFORM_RK3326  -DRK_DRM_GRALLOC=1 \
+LOCAL_CPPFLAGS += -DTARGET_BOARD_PLATFORM_RK3326 \
                -DMALI_AFBC_GRALLOC=1
 LOCAL_CPPFLAGS += -DRK_MULTI_AREAS_FORMAT_LIMIT
 RK_SORT_AREA_BY_XPOS = 0
 RK_HOR_INTERSECT_LIMIT = 1
+
+ifneq (1,$(strip $(shell expr $(PLATFORM_SDK_VERSION) \< 30)))
+LOCAL_CFLAGS += -DUSE_GRALLOC_4=1
+USE_GRALLOC_4 = 1
+ifeq ($(USE_GRALLOC_4), 1)
+LOCAL_C_INCLUDES += \
+        hardware/rockchip/libgralloc/bifrost/src \
+        hardware/libhardware/include
+
+LOCAL_SRC_FILES += \
+        drmgralloc4.cpp
+
+LOCAL_SHARED_LIBRARIES += \
+        libhidlbase \
+        libgralloctypes \
+        android.hardware.graphics.mapper@4.0
+
+LOCAL_HEADER_LIBRARIES += \
+        libgralloc_headers
+endif
+else
+LOCAL_CPPFLAGS += -DRK_DRM_GRALLOC=1
+endif
+
 ifeq ($(strip $(TARGET_BOARD_PLATFORM_PRODUCT)),tablet)
 LOCAL_CPPFLAGS += -DRK3326_MID
 endif
@@ -448,7 +473,7 @@ ifeq (1,$(strip $(shell expr $(PLATFORM_SDK_VERSION) \>= 26)))
 LOCAL_PROPRIETARY_MODULE := true
 endif
 LOCAL_MODULE_TAGS := optional
-LOCAL_CFLAGS += -Wno-unused-function
+LOCAL_CFLAGS += -Wno-unused-function -Wno-unused-parameter
 LOCAL_CFLAGS += -Wno-unused-variable
 LOCAL_CFLAGS += -DPLATFORM_SDK_VERSION=$(PLATFORM_SDK_VERSION)
 LOCAL_MODULE_RELATIVE_PATH := hw

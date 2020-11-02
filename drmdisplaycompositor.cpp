@@ -65,6 +65,10 @@
 #include "hwc_debug.h"
 #include "hwc_rockchip.h"
 
+#if USE_GRALLOC_4
+#include "drmgralloc4.h"
+#endif
+
 #define DRM_QUEUE_USLEEP 10
 #define DRM_DISPLAY_COMPOSITOR_MAX_QUEUE_DEPTH 1
 
@@ -337,11 +341,15 @@ DrmDisplayCompositor::DrmDisplayCompositor()
     return;
   dump_last_timestamp_ns_ = ts.tv_sec * 1000 * 1000 * 1000 + ts.tv_nsec;
 
+#if USE_GRALLOC_4
+    gralloc_ = NULL;
+#else   // USE_GRALLOC_4
   int ret = hw_get_module(GRALLOC_HARDWARE_MODULE_ID,
                       (const hw_module_t **)&gralloc_);
   if (ret) {
     ALOGE("Failed to open gralloc module %d", ret);
   }
+#endif  // USE_GRALLOC_4
 
 #if RK_DEBUG_CHECK_CRC
     initCrcTable();
@@ -532,6 +540,9 @@ int DrmDisplayCompositor::PrepareFramebuffer(
   }
 
 #if USE_AFBC_LAYER
+#if USE_GRALLOC_4
+            pre_comp_layer.internal_format = gralloc4::get_internal_format(fb.buffer()->handle);
+#else // #if USE_GRALLOC_4
 #if RK_PER_MODE
       struct gralloc_drm_handle_t* drm_hnd = (struct gralloc_drm_handle_t *)fb.buffer()->handle;
       pre_comp_layer.internal_format = drm_hnd->internal_format;
@@ -543,6 +554,7 @@ int DrmDisplayCompositor::PrepareFramebuffer(
         return ret;
     }
 #endif
+#endif // #if USE_GRALLOC_4
 #endif
 
   return ret;
@@ -919,6 +931,9 @@ int DrmDisplayCompositor::PrepareFrame(DrmDisplayComposition *display_comp) {
       squash_layer.display_frame = DrmHwcRect<int>(
           0, 0, squash_layer.buffer->width, squash_layer.buffer->height);
 #if USE_AFBC_LAYER
+#if USE_GRALLOC_4
+        squash_layer.internal_format = gralloc4::get_internal_format(fb.buffer()->handle);
+#else // #if USE_GRALLOC_4
 #if RK_PER_MODE
     struct gralloc_drm_handle_t* drm_hnd = (struct gralloc_drm_handle_t *)fb.buffer()->handle;
     squash_layer.internal_format = drm_hnd->internal_format;
@@ -930,6 +945,7 @@ int DrmDisplayCompositor::PrepareFrame(DrmDisplayComposition *display_comp) {
         return ret;
     }
 #endif
+#endif // #if USE_GRALLOC_4
 #endif
      ret = display_comp->CreateNextTimelineFence("SquashLayer");
       if (ret <= 0) {
