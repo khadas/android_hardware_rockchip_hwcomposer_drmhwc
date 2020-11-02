@@ -59,6 +59,10 @@ LOCAL_C_INCLUDES := \
 	external/libdrm/include/drm \
 	system/core/include/utils \
 	hardware/rockchip/librga
+# API 30 -> Android 11.0
+ifneq (1,$(strip $(shell expr $(PLATFORM_SDK_VERSION) \< 30)))
+LOCAL_CFLAGS += -DANDROID_R
+endif
 
 # API 29 -> Android 10.0
 ifneq (1,$(strip $(shell expr $(PLATFORM_SDK_VERSION) \< 29)))
