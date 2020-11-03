@@ -369,10 +369,10 @@ LOCAL_CPPFLAGS += -DRK_MULTI_AREAS_FORMAT_LIMIT
 RK_SORT_AREA_BY_XPOS = 0
 RK_HOR_INTERSECT_LIMIT = 1
 
-ifneq (1,$(strip $(shell expr $(PLATFORM_SDK_VERSION) \< 30)))
+# Gralloc 4.0
+ifeq ($(TARGET_RK_GRALLOC_VERSION),4)
 LOCAL_CFLAGS += -DUSE_GRALLOC_4=1
-USE_GRALLOC_4 = 1
-ifeq ($(USE_GRALLOC_4), 1)
+
 LOCAL_C_INCLUDES += \
         hardware/rockchip/libgralloc/bifrost/src \
         hardware/libhardware/include
@@ -387,7 +387,6 @@ LOCAL_SHARED_LIBRARIES += \
 
 LOCAL_HEADER_LIBRARIES += \
         libgralloc_headers
-endif
 else
 LOCAL_CPPFLAGS += -DRK_DRM_GRALLOC=1
 endif
