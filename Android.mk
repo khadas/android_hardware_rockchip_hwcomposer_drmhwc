@@ -33,7 +33,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+BOARD_USES_DRM_HWCOMPOSER2=false
+BOARD_USES_DRM_HWCOMPOSER=false
+ifeq ($(strip $(TARGET_BOARD_PLATFORM)),rk356x)
+BOARD_USES_DRM_HWCOMPOSER2=true
+else
 BOARD_USES_DRM_HWCOMPOSER=true
+endif
+
 ifeq ($(strip $(BOARD_USES_DRM_HWCOMPOSER)),true)
 
 LOCAL_PATH := $(call my-dir)
