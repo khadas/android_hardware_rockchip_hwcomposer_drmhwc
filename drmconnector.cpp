@@ -249,6 +249,8 @@ int DrmConnector::UpdateModes() {
   }
   raw_modes_.swap(new_raw_modes);
 
+  drmModeFreeConnector(c);
+
   return 0;
 }
 
