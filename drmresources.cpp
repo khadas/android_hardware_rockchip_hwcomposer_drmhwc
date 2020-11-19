@@ -243,6 +243,7 @@ void DrmResources::ConfigurePossibleDisplays()
         if (!strcmp(connector_type_str(conn->get_type()), conn_name.c_str()) ||
             !strcmp(acConnName, conn_name.c_str()))
         {
+          //ALOGD("Primary_name = %s, connector_name = %s",conn_name.c_str(),connector_type_str(conn->get_type()));
           conn->set_priority(connector_priority);
           conn->set_display_possible(HWC_DISPLAY_PRIMARY_BIT);
           connector_priority++;
@@ -458,9 +459,10 @@ int DrmResources::Init() {
   ConfigurePossibleDisplays();
   SetPrimaryDisplay(NULL);
   for (auto &conn : connectors_) {
+    //ALOGD("Find_primary connector_name = %s , state = %d",connector_type_str(conn->get_type()),conn->state() );
     if (!(conn->possible_displays() & HWC_DISPLAY_PRIMARY_BIT))
       continue;
-    if (!(conn->built_in()))
+    if (!(conn->possible_displays() & HWC_DISPLAY_PRIMARY_BIT) && !(conn->built_in()))
       continue;
     if (conn->state() != DRM_MODE_CONNECTED)
       continue;
