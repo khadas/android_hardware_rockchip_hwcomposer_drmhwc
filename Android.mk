@@ -253,9 +253,12 @@ LOCAL_CPPFLAGS += -DUSE_PLANE_RESERVED
 endif
 endif
 
+
+# 3399, 3399pro
 ifneq ($(filter rk3399 rk3399pro, $(strip $(TARGET_BOARD_PLATFORM))), )
+USE_AFBC_LAYER = 1
 RGA_VER = 4
-LOCAL_CPPFLAGS += -DTARGET_BOARD_PLATFORM_RK3399 -DRK_DRM_GRALLOC=1 \
+LOCAL_CPPFLAGS += -DTARGET_BOARD_PLATFORM_RK3399 \
                -DMALI_AFBC_GRALLOC=1
 ifeq ($(strip $(TARGET_BOARD_PLATFORM_PRODUCT)),tablet)
 LOCAL_CPPFLAGS += -DRK3399_MID
@@ -269,8 +272,29 @@ endif
 ifeq ($(strip $(TARGET_BOARD_PLATFORM_PRODUCT)),vr)
 LOCAL_CPPFLAGS += -DRK3399_VR
 endif
+
+# Gralloc 4.0
+ifeq ($(TARGET_RK_GRALLOC_VERSION),4)
+LOCAL_CFLAGS += -DUSE_GRALLOC_4=1
+LOCAL_C_INCLUDES += \
+        hardware/rockchip/libgralloc/midgard/src \
+        hardware/libhardware/include
+LOCAL_SRC_FILES += \
+        drmgralloc4.cpp
+LOCAL_SHARED_LIBRARIES += \
+        libhidlbase \
+        libgralloctypes \
+        android.hardware.graphics.mapper@4.0
+LOCAL_HEADER_LIBRARIES += \
+        libgralloc_headers
+else
+LOCAL_CPPFLAGS += -DRK_DRM_GRALLOC=1
 endif
 
+endif
+
+
+# 3366
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)),rk3366)
 RGA_VER = 2
 LOCAL_CPPFLAGS += -DTARGET_BOARD_PLATFORM_RK3366 -DRK_DRM_GRALLOC=1 \
