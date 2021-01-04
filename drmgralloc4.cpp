@@ -264,10 +264,25 @@ uint64_t get_internal_format(buffer_handle_t handle)
     auto &mapper = get_service();
     uint32_t fourcc;
     uint64_t modifier;
+    int format_requested;
 
     /* 获取 format_fourcc. */
     int err = get_metadata(mapper, handle, MetadataType_PixelFormatFourCC, decodePixelFormatFourCC, &fourcc);
     assert(err == android::NO_ERROR);
+
+    // .trick : 目前的 gralloc 4.0 实现中,
+    //          为 req_format HAL_PIXEL_FORMAT_YCrCb_NV12_10(rk_nv12_10) 分配的 buffer 的格式是 MALI_GRALLOC_FORMAT_INTERNAL_P010.
+    //          预期 GPU 不应该且不会参与对这样的 buffer 的读写.
+    //          VPU 和 VOP 可处理这样的 buffer, 预期的格式仍旧是 rk_nv12_10, 且将从 width 获取 byte_stride.
+    if ( DRM_FORMAT_P010 == fourcc )
+    {
+        err = get_format_requested(handle, &format_requested);
+        assert(err == android::NO_ERROR);
+        if ( HAL_PIXEL_FORMAT_YCrCb_NV12_10 == format_requested )
+        {
+            return HAL_PIXEL_FORMAT_YCrCb_NV12_10;
+        }
+    }
 
     /* 获取 format_modifier. */
     err = get_metadata(mapper, handle, MetadataType_PixelFormatModifier, decodePixelFormatModifier, &modifier);
