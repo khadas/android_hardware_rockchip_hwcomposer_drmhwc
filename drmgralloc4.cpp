@@ -378,7 +378,7 @@ int get_pixel_stride(buffer_handle_t handle, int* pixel_stride)
 
         if ( layouts.size() > 1 )
         {
-            W("it's not reasonable to get global pixel_stride of buffer with planes more than 1.");
+            V("it's not reasonable to get global pixel_stride of buffer with planes more than 1.");
         }
 
         if ( 0 == layouts[0].sampleIncrementInBits )
@@ -438,7 +438,7 @@ int get_byte_stride(buffer_handle_t handle, int* byte_stride)
 
         if ( layouts.size() > 1 )
         {
-            W("it's not reasonable to get global byte_stride of buffer with planes more than 1.");
+            V("it's not reasonable to get global byte_stride of buffer with planes more than 1.");
         }
 
         *byte_stride = (layouts[0].strideInBytes);
