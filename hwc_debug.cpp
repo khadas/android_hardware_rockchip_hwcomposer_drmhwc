@@ -287,8 +287,18 @@ int DumpLayerList(hwc_display_contents_1_t *dc, const gralloc_module_t *gralloc)
             else
                 sprintf(data_name,"/data/dump/layer-%d-%dx%d-%zu.yuv",DumpSurfaceCount, stride,height,i);
 
+#if USE_GRALLOC_4
+            gralloc4::lock(sf_layer->handle,
+                           GRALLOC_USAGE_SW_READ_MASK, // 'usage'
+                           0, // 'x'
+                           0, // 'y'
+                           width,
+                           height,
+                           (void **)&cpu_addr); // 'outData'
+#else
             gralloc->lock(gralloc, sf_layer->handle, GRALLOC_USAGE_SW_READ_MASK | GRALLOC_USAGE_SW_WRITE_MASK, //gr_handle->usage,
                             0, 0, width, height, (void **)&cpu_addr);
+#endif
             pfile = fopen(data_name,"wb");
             if(pfile) {
                 fwrite((const void *)cpu_addr,(size_t)(size),1,pfile);
@@ -301,7 +311,11 @@ int DumpLayerList(hwc_display_contents_1_t *dc, const gralloc_module_t *gralloc)
                 ALOGD("dump surface layer_name: %s,data_name %s,w:%d,h:%d,stride :%d,size=%d,cpu_addr=%p",
                     sf_layer->LayerName,data_name,width,height,byte_stride,size,cpu_addr);
             }
+#if USE_GRALLOC_4
+            gralloc4::unlock(sf_layer->handle);
+#else
             gralloc->unlock(gralloc, sf_layer->handle);
+#endif
         }
     }
     return 0;
