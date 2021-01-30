@@ -316,7 +316,7 @@ endif
 ifeq ($(strip $(TARGET_BOARD_PLATFORM)),rk3288)
 RGA_VER = 3
 RK_CTS_WORKROUND = 0
-LOCAL_CPPFLAGS += -DTARGET_BOARD_PLATFORM_RK3288  -DRK_DRM_GRALLOC=1 \
+LOCAL_CPPFLAGS += -DTARGET_BOARD_PLATFORM_RK3288 \
                -DMALI_AFBC_GRALLOC=1
 LOCAL_CPPFLAGS += -DRK_MULTI_AREAS_FORMAT_LIMIT
 RK_SORT_AREA_BY_XPOS = 0
@@ -337,7 +337,26 @@ endif
 ifeq ($(strip $(TARGET_BOARD_PLATFORM_PRODUCT)),stbvr)
 LOCAL_CPPFLAGS += -DRK3288_VR
 endif
+
+# Gralloc 4.0
+ifeq ($(TARGET_RK_GRALLOC_VERSION),4)
+LOCAL_CFLAGS += -DUSE_GRALLOC_4=1
+LOCAL_C_INCLUDES += \
+        hardware/rockchip/libgralloc/midgard/src \
+        hardware/libhardware/include
+LOCAL_SRC_FILES += \
+        drmgralloc4.cpp
+LOCAL_SHARED_LIBRARIES += \
+        libhidlbase \
+        libgralloctypes \
+        android.hardware.graphics.mapper@4.0
+LOCAL_HEADER_LIBRARIES += \
+        libgralloc_headers
+else
++LOCAL_CPPFLAGS += -DRK_DRM_GRALLOC=1
 endif
+endif
+
 
 ifneq ($(filter rk3328 rk3228h, $(TARGET_BOARD_PLATFORM)),)
 RK_VER = 2
