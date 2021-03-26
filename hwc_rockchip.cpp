@@ -128,7 +128,7 @@ bool isAfbcInternalFormat(uint64_t internal_format)
 #elif defined(TARGET_BOARD_PLATFORM_RK3399)
     return (internal_format & GRALLOC_ARM_INTFMT_AFBC);             // for Midgard gralloc r14
 #elif defined(TARGET_BOARD_PLATFORM_RK3326)
-    ALOGD_IF(log_level(DBG_VERBOSE),"internal_format : %llx, MALI_GRALLOC_INTFMT_AFBC_BASIC : %llx", internal_format, MALI_GRALLOC_INTFMT_AFBC_BASIC);
+    ALOGD_IF(log_level(DBG_VERBOSE),"internal_format : %" PRIx64 ", MALI_GRALLOC_INTFMT_AFBC_BASIC : %llx", internal_format, MALI_GRALLOC_INTFMT_AFBC_BASIC);
     return (internal_format & MALI_GRALLOC_INTFMT_AFBC_BASIC);      // for Bifrost gralloc r8
 #else
     UN_USED(internal_format);
