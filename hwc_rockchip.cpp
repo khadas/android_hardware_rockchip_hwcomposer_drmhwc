@@ -572,7 +572,16 @@ exit:
 int hwc_get_handle_layername(const gralloc_module_t *gralloc, buffer_handle_t hnd, char* layername, unsigned long len)
 {
 #if USE_GRALLOC_4
-        strcpy(layername, "dummy");
+        std::string name;
+
+        int err = gralloc4::get_name(hnd, name);
+        if (err != android::OK)
+        {
+            ALOGE("Failed to get buffer format_requested, err : %d", err);
+            return -1;
+        }
+
+        strcpy(layername, name.c_str());
         return 0;
 #else   // USE_GRALLOC_4
 
