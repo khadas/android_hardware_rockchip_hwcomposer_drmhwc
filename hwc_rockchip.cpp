@@ -581,7 +581,9 @@ int hwc_get_handle_layername(const gralloc_module_t *gralloc, buffer_handle_t hn
             return -1;
         }
 
-        strcpy(layername, name.c_str());
+        int str_size = strlen(name.c_str())+1;
+        str_size = str_size > len ? len:str_size;
+        strncpy(layername, name.c_str(),str_size);
         return 0;
 #else   // USE_GRALLOC_4
 
