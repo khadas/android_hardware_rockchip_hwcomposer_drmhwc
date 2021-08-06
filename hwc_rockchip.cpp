@@ -2805,7 +2805,7 @@ int hwc_get_baseparameter_config(char *parameter, int display, int flag, int typ
 
                     for( i = 0 ; i < 5 ; i++)
                     {
-                        if(type == base_parameter.main.screen_list[i].type)
+                        if(type == base_parameter.aux.screen_list[i].type)
                         {
                             type_found = true;
                             break;
@@ -3065,7 +3065,7 @@ int hwc_get_baseparameter_config(char *parameter, int display, int flag, int typ
 
                 for( i = 0 ; i < SCREEN_LIST_MAX ; i++ )
                 {
-                    if(type == base_parameter.main.screen_list[i].type)
+                    if(type == base_parameter.aux.screen_list[i].type)
                     {
                         type_found = true;
                         break;
