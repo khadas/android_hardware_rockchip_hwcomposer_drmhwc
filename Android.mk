@@ -100,6 +100,12 @@ ifneq (1,$(strip $(shell expr $(PLATFORM_SDK_VERSION) \< 30)))
 LOCAL_CFLAGS += -DANDROID_R
 endif
 
+ifneq (1,$(strip $(shell expr $(PLATFORM_SDK_VERSION) \< 31)))
+LOCAL_CFLAGS += -Wno-unreachable-code-loop-increment -DANDROID_S
+LOCAL_HEADER_LIBRARIES += \
+    libhardware_rockchip_headers
+endif
+
 # API 29 -> Android 10.0
 ifneq (1,$(strip $(shell expr $(PLATFORM_SDK_VERSION) \< 29)))
 
