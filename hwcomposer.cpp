@@ -796,9 +796,15 @@ int DrmHwcNativeHandle::CopyBufferHandle(buffer_handle_t handle,
 
 DrmHwcNativeHandle::~DrmHwcNativeHandle() {
   Clear();
+  pthread_mutex_destroy(&lock_);
 }
 
 void DrmHwcNativeHandle::Clear() {
+    AutoLock lock(&lock_, "DrmHwcNativeHandle::Clear");
+    int ret = lock.Lock();
+    if (ret)
+      return;
+
 #if USE_GRALLOC_4
       if ( handle_ != NULL )
       {
@@ -807,7 +813,6 @@ void DrmHwcNativeHandle::Clear() {
           handle_ = NULL;
       }
 #else   // USE_GRALLOC_4
-
   if (gralloc_ != NULL && handle_ != NULL) {
     gralloc_->unregisterBuffer(gralloc_, handle_);
     free_buffer_handle(handle_);
