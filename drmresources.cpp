@@ -306,7 +306,7 @@ int DrmResources::Init() {
   ret = drmSetClientCap(fd(), DRM_CLIENT_CAP_SHARE_PLANES, 1);
   if (ret) {
     ALOGE("Failed to set share planes %d", ret);
-    return ret;
+    //return ret;
   }
 #endif
 
