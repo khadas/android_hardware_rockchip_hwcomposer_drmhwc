@@ -114,7 +114,8 @@ LOCAL_CFLAGS += -DDRM_DRIVER_VERSION=2 -DUSE_NO_ASPECT_RATIO=1
 
 ifeq ($(strip $(TARGET_BOARD_PLATFORM_GPU)), mali-tDVx)
 LOCAL_C_INCLUDES += \
-       hardware/rockchip/libgralloc/bifrost
+       hardware/rockchip/libgralloc/bifrost \
+       hardware/rockchip/libgralloc/midgard
 endif
 
 ifneq (,$(filter mali-t860 mali-t760, $(TARGET_BOARD_PLATFORM_GPU)))
@@ -424,6 +425,7 @@ LOCAL_CFLAGS += -DUSE_GRALLOC_4=1
 
 LOCAL_C_INCLUDES += \
         hardware/rockchip/libgralloc/bifrost/src \
+        hardware/rockchip/libgralloc/midgard/src \
         hardware/libhardware/include
 
 LOCAL_SRC_FILES += \
