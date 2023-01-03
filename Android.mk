@@ -35,7 +35,7 @@
 
 BOARD_USES_DRM_HWCOMPOSER2=false
 BOARD_USES_DRM_HWCOMPOSER=false
-ifneq ($(filter rk356x rk3588, $(strip $(TARGET_BOARD_PLATFORM))), )
+ifneq ($(filter rk356x rk3588 rk3528 rk3562, $(strip $(TARGET_BOARD_PLATFORM))), )
 BOARD_USES_DRM_HWCOMPOSER2=true
 else
 BOARD_USES_DRM_HWCOMPOSER=true
