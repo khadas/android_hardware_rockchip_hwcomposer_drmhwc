@@ -104,6 +104,9 @@ int DrmGenericImporter::Init() {
 void DrmGenericImporter::SetFlag(DrmGenericImporterFlag_t flag){
   flag_ = flag;
 }
+#ifndef DRM_FORMAT_NV15
+#define DRM_FORMAT_NV15 fourcc_code('N', 'V', '1', '5') /* 2x2 subsampled Cr:Cb plane */
+#endif
 
 uint32_t DrmGenericImporter::ConvertHalFormatToDrm(uint32_t hal_format) {
   /*
@@ -132,7 +135,11 @@ uint32_t DrmGenericImporter::ConvertHalFormatToDrm(uint32_t hal_format) {
     case HAL_PIXEL_FORMAT_YCrCb_NV12:
       return DRM_FORMAT_NV12;
     case HAL_PIXEL_FORMAT_YCrCb_NV12_10:
-      return DRM_FORMAT_NV12_10;
+      if(gIsDrmVerison510()){
+        return DRM_FORMAT_NV15;
+      }else{
+        return DRM_FORMAT_NV12_10;
+      }
     default:
       ALOGE("Cannot convert hal format to drm format %u", hal_format);
       return -EINVAL;

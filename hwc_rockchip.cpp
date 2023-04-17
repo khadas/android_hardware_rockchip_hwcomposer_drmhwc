@@ -105,6 +105,19 @@ int hwc_init_version()
     return 0;
 }
 
+
+int g_drm_version = 0;
+void gSetDrmVersion(int drm_version){
+  g_drm_version = drm_version;
+}
+bool gIsDrmVerison510(){
+  return g_drm_version == 3;
+}
+bool gIsDrmVerison419(){
+  return g_drm_version == 2;
+}
+
+
 #if USE_AFBC_LAYER
 
 #ifdef TARGET_BOARD_PLATFORM_RK3368

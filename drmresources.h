@@ -163,6 +163,10 @@ class DrmResources {
   int hotplug_timeline;
   int prop_timeline_;
 
+  // Kernel 4.19 = 2.0.0
+  // Kernel 5.10 = 3.0.0
+  int drm_version_;
+
   std::vector<std::unique_ptr<DrmConnector>> connectors_;
   std::vector<std::unique_ptr<DrmEncoder>> encoders_;
   std::vector<std::unique_ptr<DrmCrtc>> crtcs_;

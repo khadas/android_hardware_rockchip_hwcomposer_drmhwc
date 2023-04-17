@@ -88,6 +88,9 @@ namespace android {
 #define WRITE_3D_MODE 			(1)
 #endif
 
+void gSetDrmVersion(int drm_version);
+bool gIsDrmVerison510();
+bool gIsDrmVerison419();
 
 /* see also http://vektor.theorem.ca/graphics/ycbcr/ */
 enum v4l2_colorspace {
@@ -417,8 +420,6 @@ enum
 };
 
 bool hwc_video_to_area(DrmHwcRect<float> &source_yuv,DrmHwcRect<int> &display_yuv,int scaleMode);
-
-
 
 int hwc_init_version();
 

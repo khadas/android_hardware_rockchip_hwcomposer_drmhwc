@@ -275,11 +275,25 @@ int DrmResources::Init() {
   property_get( PROPERTY_TYPE ".hwc.drm.device", path, "/dev/dri/card0");
 
   init_white_modes();
-  /* TODO: Use drmOpenControl here instead */
-  fd_.Set(open(path, O_RDWR));
+  /* 避免错误打开 npu deviecs 而导致问题
+   *  GKI版本原来的 /dev/dri/card0 设备可能会是NPU设备
+   *  故需要修改成 drmOpen("rockchip", NULL)，避免出错
+   */
+  fd_.Set(drmOpen("rockchip", NULL));
   if (fd() < 0) {
-    ALOGE("Failed to open dri- %s", strerror(-errno));
+    ALOGE("Failed to open drm rockchip devices %s", strerror(-errno));
     return -ENODEV;
+  }
+
+  // Kernel 4.19 = 2.0.0
+  // Kernel 5.10 = 3.0.0
+  gSetDrmVersion(2);  // kernel 4.19
+  drmVersionPtr version = drmGetVersion(fd());
+  if(version != NULL){
+    drm_version_ = version->version_major;
+    ALOGI("DrmVersion=%d.%d.%d",version->version_major,version->version_minor,version->version_patchlevel);
+    gSetDrmVersion(version->version_major);
+    drmFreeVersion(version);
   }
 
   int ret = drmSetClientCap(fd(), DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1);
